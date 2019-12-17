@@ -11,21 +11,45 @@ void snail(long w, long h, void (*ret)(long, void*), void *data)
            for (i = 1; i <= 5; i++)
                ret(i, data);
      */
-        int i,j,h1,w1, add, w0, h0;
-        add = 1;
-        w1 = w;
-        h1 = h;
-        w0 = 0;
+        const int incdec = w, rozmiar = w * h;
+        int i , j, licznik, add;
+        add =0;
+        licznik = 0;
+    while(licznik <  rozmiar)
+    {
+      for (i = 0; i < w; i++)
+      {
+          licznik++;
+          ret(++add, data);
+      }
+      h--;
+      if(licznik >=  rozmiar) break;
+      for (i = 0; i < h; i++)
+      {
+          add += incdec;
+          licznik++;
+          ret(add, data);
+      }
+      w--;
+      if(licznik >=  rozmiar) break;
+      for (i = 0; i < w; i++)
+      {
+          add--;
+          licznik++;
+          ret(add, data);
+      }
+      h--;
+      if(licznik >=  rozmiar) break;
+      for (i = 0; i < h; i++)
+      {
+          add -= incdec;
+          licznik++;
+          ret(add, data);
+      }
+      w--;
 
-        for (i = 0; i < w * h; i++)
-        {
-            w0++;
-           ret(i + add, data);
-           if(add == 1 && w0 == w1 ) {add = w1; w0 == 0;} else
-           if(add == w1 && w0 == h1 ) {add = -1;  w0 = 0;}else
-           if(add == -1 && w0 == w1 ) {add = -7;  w0 = 0; h1--;}else
-           if(add == -7 && w0 == h1 ) {add = 1;  w0 = 0; w1--;}
-        }
+    }
+
 }
 
 struct print_data
