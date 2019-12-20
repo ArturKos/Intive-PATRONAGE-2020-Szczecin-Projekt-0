@@ -11,10 +11,10 @@ void snail(long w, long h, void (*ret)(long, void*), void *data)
            for (i = 1; i <= 5; i++)
                ret(i, data);
      */
-        const int incdec = w, rozmiar = w * h;
-        int i , j, licznik, add;
-        add =0;
-        licznik = 0;
+    const int incdec = w, rozmiar = w * h;
+    int i , licznik, add;
+    add = 0;
+    licznik = 0;
     while(licznik <  rozmiar)
     {
       for (i = 0; i < w; i++)
@@ -47,7 +47,6 @@ void snail(long w, long h, void (*ret)(long, void*), void *data)
           ret(add, data);
       }
       w--;
-
     }
 
 }
