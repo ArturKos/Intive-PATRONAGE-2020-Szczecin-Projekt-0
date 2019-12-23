@@ -3,7 +3,7 @@
 
 void str_copy(char *to, const char *from)
 {
-    while ( *to++ = *from ? *from++ : *from );
+    while ( *to++ = *from ++);
 }
 int main(int argc, char *argv[])
 {
