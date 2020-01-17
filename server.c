@@ -6,12 +6,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
 #define MAX 4096
-#define PORT 8080
 #define SA struct sockaddr
-
 /* function prototype */
-void func(int sockfd);
+
 void bzero(void *s, size_t n);
 
 /*
@@ -20,93 +19,46 @@ Template of the server downloaded from https://www.geeksforgeeks.org/tcp-server-
 
 */
 
-/* Function designed for chat between client and server. */
-void func(int sockfd)
+int main(int argc, char* argv[])
 {
-	char buff[MAX];
+	int sockfd, connfd, len, len_inet;
+	struct sockaddr_in servaddr, cli;
+	char localhost[] = "localhost\n";
+    	char buff[MAX];
 	int idx, i, j;
 	bool match;
 
-	/* infinite loop for chat*/
-	for (;;) {
-		bzero(buff, MAX);
-		idx = -1;
-		match = false;
-		/* read the message from client and copy it in buffer */
-		read(sockfd, buff, sizeof(buff));
-
-        /* if msg contains "Exit" then server exit and chat ended. */
-        if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            break;
-		}
-		/*
-		  do we hava a space in the buffer ?
-		*/
-		for(i=0; i<MAX; i++)
-		 if(buff[i] ==' ')
-		  {
- 		   idx = i;
-		   break;
-		  }
-        if(idx >0)
-		for(i = idx; i<MAX-idx; i++) /* searching for a substring */
-		 {
- 		  match = true;
- 		  for(j=0; j < idx; j++)
- 		   if(buff[j]!=buff[i+j])
-		    {
-		     match = false;
-		     break;
-		    }
-		 if(match==true)
-          {
-		    idx = i-idx;
-		    break;
-		   }
-		 }
-		/*clear the buffer */
-	    bzero(buff, MAX);
-
-		if(match && idx!=-1)
-		  snprintf(buff, MAX, "%d\n", idx-1);else
-          snprintf(buff, MAX, "%d\n", -1);
-
-        printf(buff, sizeof(buff));
-        /* and send that buffer to client */
-        write(sockfd, buff, sizeof(buff));
-	}
-}
-
-int main()
-{
-	int sockfd, connfd, len;
-	struct sockaddr_in servaddr, cli;
-
+    if(argc!=3)
+     {
+      printf ("Usage %s ip port\n", argv[0]);
+      return 1;
+     }
 
 	/* socket create and verification */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
 		printf("socket creation failed...\n");
-		exit(0);
+		return 1;
 	}
 	bzero(&servaddr, sizeof(servaddr));
 
 	/* assign IP, PORT */
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(PORT);
+	if(strcmp(localhost, argv[1]))
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);else
+	servaddr.sin_addr.s_addr = inet_addr(argv[1]);
+	servaddr.sin_port = htons(atoi(argv[2]));
 
 	/* Binding newly created socket to given IP and verification */
 	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
 		printf("socket bind failed...\n");
-		exit(0);
+		return 1;
 	}
 
 	/* Now server is ready to listen and verification */
 	if ((listen(sockfd, 5)) != 0) {
 		printf("Listen failed...\n");
-		exit(0);
+		return 1;
 	}
 
 	len = sizeof(cli);
@@ -115,13 +67,54 @@ int main()
 	connfd = accept(sockfd, (SA*)&cli, &len);
 	if (connfd < 0) {
 		printf("server acccept failed...\n");
-		exit(0);
+		return 1;
 	}
 
-	/* Function for chatting between client and server */
-	func(connfd);
+    bzero(buff, MAX);
+    idx = -1;
+    match = false;
+    /* read the message from client and copy it in buffer */
+    read(connfd), buff, sizeof(buff));
+    printf(buff, sizeof(buff));
+    /*
+        do we hava a space in the buffer ?
+    */
+    for(i=0; i<MAX; i++)
+     if(buff[i] ==' ')
+      {
+        idx = i;
+        break;
+      }
+
+    if(idx >0)
+    for(i = idx; i<MAX-idx; i++) /* searching for a substring */
+     {
+      match = true;
+
+      for(j=0; j < idx; j++)
+       if(buff[j]!=buff[i+j]){
+        match = false;
+        break;
+       }
+      if(match==true){
+       idx = i-idx;
+       break;
+      }
+     }
+    /*clear the buffer */
+    bzero(buff, MAX);
+
+    if(match && idx!=-1)
+    snprintf(buff, MAX, "%d\n", idx-1);else
+    snprintf(buff, MAX, "%d\n", -1);
+
+    printf(buff, sizeof(buff));
+    /* and send that buffer to client */
+    write(connfd), buff, sizeof(buff));
 
 	/* After chatting close the socket */
 	close(sockfd);
+
+	return 0;
 }
 
