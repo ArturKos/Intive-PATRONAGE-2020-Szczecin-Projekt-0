@@ -6,8 +6,6 @@
 Functions prototypes
 */
 typedef int (*cmp_t)(const void *a, const void *b);
-int cmp_int(const void *a, const void *b);
-int cmp_str(const void *a, const void *b);
 
 /*
 Auxiliary function which swaps the pointer of two variables
@@ -29,66 +27,34 @@ void validateMaxHeap(void *array, size_t heapSize, size_t size, int parentIndex,
 	int maxIndex = parentIndex;
 	int leftChild = parentIndex * 2 + 1;
 	int rightChild = parentIndex * 2 + 2;
-    int   *baseint = (int*)array;
-    char **basestr = (char **)array;
 
 	if(array == NULL) return;
 
-        if(cmp == cmp_int)
-        {
-            if(leftChild < heapSize && cmp(&baseint[leftChild], &baseint[maxIndex])==1){
+            if(leftChild < heapSize && cmp(array+leftChild*size, array+maxIndex*size)>0){
                 maxIndex = leftChild;
             }
-            if(rightChild < heapSize && cmp(&baseint[rightChild], &baseint[maxIndex])==1){
+            if(rightChild < heapSize && cmp(array+rightChild*size, array+maxIndex*size)>0){
                 maxIndex = rightChild;
             }
             if(maxIndex != parentIndex){
-                swap(&baseint[maxIndex], &baseint[parentIndex], size);
+                swap(array+maxIndex*size, array+parentIndex*size, size);
                 validateMaxHeap(array, heapSize, size, maxIndex, cmp);
             }
-        }else
-        {
-            if(leftChild < heapSize && cmp(&basestr[leftChild], &basestr[maxIndex])>0){
-                maxIndex = leftChild;
-            }
-            if(rightChild < heapSize && cmp(&basestr[rightChild], &basestr[maxIndex])>0){
-                maxIndex = rightChild;
-            }
-            if(maxIndex != parentIndex){
-                swap(&basestr[maxIndex], &basestr[parentIndex], size);
-                validateMaxHeap(array, heapSize, size, maxIndex, cmp);
-            }
-        }
 }
 void heapsort(void *base, size_t nmemb, size_t size, cmp_t cmp)
 {
     /* Declaring local function varibles */
-    int   *baseint = (int*)base;
-    char **basestr = (char **)base;
     int n = nmemb;
     register int i;
 
 		if(base == NULL || nmemb == 0) return;
-
-		if(cmp == cmp_int) /* Are we comparing int or string values? */
-		{ /*comparing int values */
             for(i = n / 2 - 1; i >= 0; i--){
                 validateMaxHeap(base, n, size, i, cmp);
             }
             for(i = n - 1; i > 0; i--){
-                swap(&baseint[0], &baseint[i], size);
+                swap(base, (base+i*size), size);
                 validateMaxHeap(base, --n, size, 0, cmp);
             }
-		}else
-		{ /*comparing strings values */
-            for(i = n / 2 - 1; i >= 0; i--){
-                validateMaxHeap(base, n, size, i, cmp);
-            }
-            for(i = n - 1; i > 0; i--){
-                swap(&basestr[0], &basestr[i], size);
-                validateMaxHeap(base, --n, size, 0, cmp);
-            }
-		}
 }
 
 int cmp_int(const void *a, const void *b)
@@ -115,6 +81,7 @@ int main(void)
         "Adam", "Gosia", "Bonawentura", "Kunegunda" };
 
     int i;
+
       heapsort(A, 8, sizeof(*A), cmp_int);
       heapsort(B, 8, sizeof(*B), cmp_str);
 
