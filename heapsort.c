@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 /*
 Functions prototypes
 */
@@ -27,19 +28,26 @@ void validateMaxHeap(void *array, size_t heapSize, size_t size, int parentIndex,
 	int maxIndex = parentIndex;
 	int leftChild = parentIndex * 2 + 1;
 	int rightChild = parentIndex * 2 + 2;
+	bool loop = true;
 
 	if(array == NULL) return;
-
-            if(leftChild < heapSize && cmp(array+leftChild*size, array+maxIndex*size)>0){
+    while(loop)
+     {
+            loop = false;
+            if(leftChild < heapSize && cmp( (uint8_t*)array+leftChild*size, (uint8_t*)array+maxIndex*size)>0){
                 maxIndex = leftChild;
             }
-            if(rightChild < heapSize && cmp(array+rightChild*size, array+maxIndex*size)>0){
+            if(rightChild < heapSize && cmp( (uint8_t*)array+rightChild*size, (uint8_t*)array+maxIndex*size)>0){
                 maxIndex = rightChild;
             }
             if(maxIndex != parentIndex){
-                swap(array+maxIndex*size, array+parentIndex*size, size);
-                validateMaxHeap(array, heapSize, size, maxIndex, cmp);
+                loop = true;
+                swap((uint8_t*)array+maxIndex*size, (uint8_t*)array+parentIndex*size, size);
+                parentIndex = maxIndex;
+                leftChild = parentIndex * 2 + 1;
+                rightChild = parentIndex * 2 + 2;
             }
+     }
 }
 void heapsort(void *base, size_t nmemb, size_t size, cmp_t cmp)
 {
@@ -52,7 +60,7 @@ void heapsort(void *base, size_t nmemb, size_t size, cmp_t cmp)
                 validateMaxHeap(base, n, size, i, cmp);
             }
             for(i = n - 1; i > 0; i--){
-                swap(base, (base+i*size), size);
+                swap(base, ((uint8_t*)base+i*size), size);
                 validateMaxHeap(base, --n, size, 0, cmp);
             }
 }
