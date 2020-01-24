@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
+#include <unistd.h>
 #define MAX 4096
 #define SA struct sockaddr
 /* function prototype */
@@ -21,10 +23,11 @@ Template of the server downloaded from https://www.geeksforgeeks.org/tcp-server-
 
 int main(int argc, char* argv[])
 {
-	int sockfd, connfd, len, len_inet;
+	int sockfd, connfd;
+	socklen_t len;
 	struct sockaddr_in servaddr, cli;
 	char localhost[] = "localhost\n";
-    	char buff[MAX];
+    char buff[MAX];
 	int idx, i, j;
 	bool match;
 
@@ -74,7 +77,7 @@ int main(int argc, char* argv[])
     idx = -1;
     match = false;
     /* read the message from client and copy it in buffer */
-    read(connfd), buff, sizeof(buff));
+    read(connfd, buff, sizeof(buff));
     printf(buff, sizeof(buff));
     /*
         do we hava a space in the buffer ?
@@ -105,12 +108,12 @@ int main(int argc, char* argv[])
     bzero(buff, MAX);
 
     if(match && idx!=-1)
-    snprintf(buff, MAX, "%d\n", idx-1);else
-    snprintf(buff, MAX, "%d\n", -1);
+    sprintf(buff, "%d\n", idx-1);else
+    sprintf(buff, "%d\n", -1);
 
     printf(buff, sizeof(buff));
     /* and send that buffer to client */
-    write(connfd), buff, sizeof(buff));
+    write(connfd, buff, sizeof(buff));
 
 	/* After chatting close the socket */
 	close(sockfd);
