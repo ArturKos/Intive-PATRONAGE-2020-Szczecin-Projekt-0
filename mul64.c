@@ -7,95 +7,22 @@ void mul64(uint64_t *p, uint64_t a, uint64_t b)
 {
     /*varibles declaration */
     uint32_t Ahigh, Bhigh, Alow, Blow;
-    uint64_t AlowmulBlow, AlowmulBhigh, AhighmulBlow, AhighmulBhigh, aux, aux2, aux3;
-    register int16_t i;
+    uint64_t AlowmulBlow, AlowmulBhigh, AhighmulBlow, AhighmulBhigh, middle;
 
-    /*setting varibles to 0 */
-    Ahigh   = 0;
-    Bhigh   = 0;
-    Alow    = 0;
-    Blow    = 0;
-    aux     = 0;
-    aux3    = 0;
-    p[0]    = 0;
-    p[1]    = 0;
-
-
-    /* gething and setting higher and lower bits */
-    for(i = 0; i<64; i++)
-    {
-        /* set Alow, Blow bits from a anb b varibles */
-        if( i<32 )
-        {
-            if( (a >> i) & 1UL) Alow |= 1UL << i;
-            if( (b >> i) & 1UL) Blow |= 1UL << i;
-        }else{
-            if( (a >> i) & 1UL) Ahigh |= 1UL << (i-32);
-            if( (b >> i) & 1UL) Bhigh |= 1UL << (i-32);
-        }
-    }
-
-    /* Alow mul Blow */
-    AlowmulBlow = Alow * Blow;
-
-    if(Alow!=0)
-    if(AlowmulBlow/Alow!=Blow) /*checking overflow of multiplication */
-    printf("AlowmulBlow overflow");
-
-    /* Alow mul Bhigh */
-    AlowmulBhigh = Alow * Bhigh;
-
-    if(Alow!=0)
-    if( AlowmulBhigh /Alow!=Bhigh) /*checking overflow of multiplication */
-    printf("AlowmulBhigh overflow");
-
-    /* Ahigh mul Blow */
-    AhighmulBlow = Ahigh * Blow;
-
-    if(Ahigh!=0)
-    if( AhighmulBlow /Ahigh!=Blow) /*checking overflow of multiplication */
-    printf("AhighmulBlow overflow");
-
-    /* Ahigh mul Bhigh */
+    /*setting varibles */
+    Ahigh   = a >> 32;
+    Bhigh   = b >> 32;
+    Alow    = (uint32_t)a;
+    Blow    = (uint32_t)b;
     AhighmulBhigh = Ahigh * Bhigh;
+    AlowmulBlow   = Alow * Blow;
+    AlowmulBhigh  = Alow * Bhigh;
+    AhighmulBlow  = Ahigh * Blow;
+    middle = AhighmulBlow + (AlowmulBlow >> 32) + (uint32_t)AlowmulBhigh;
+    p[0]    = (middle << 32) | (uint32_t)AlowmulBlow;
+    p[1]    = AhighmulBhigh + (middle >> 32) + (AlowmulBhigh >> 32);
 
-    if(Ahigh!=0)
-    if( AhighmulBhigh /Ahigh!=Bhigh) /*checking overflow of multiplication */
-    printf("AhighmulBlow overflow");
 
-
-    /* a mul b
-       first - copy bits into p, aux, aux3 */
-for(i = 0; i<64;i++)
-    {
-        if( (AlowmulBlow >> i) & 1UL) p[0] |= 1UL << i;
-        if( (AhighmulBhigh>> i) & 1UL) p[1] |= 1UL << i;
-        if(i<32){
-         if ( (AhighmulBhigh >> i) & 1UL)  aux |= 1UL << (i+32);
-         if ( (AlowmulBlow >> (i+32)) & 1UL) aux3 |= 1UL << i;
-         }else{
-         if ( (AlowmulBlow >> i) & 1UL)  aux |= 1UL << (i-32);
-         if ( (AhighmulBhigh>> (i-32)) & 1UL) aux3 |= 1UL << i;
-         }
-    }
-
-aux2 = aux;
-aux = aux + AlowmulBhigh + AhighmulBlow + aux3;
-if( aux - AlowmulBhigh - AhighmulBlow - aux3 !=aux2 ) /*checking overflow of addition */
-printf("Addition overflow");
-
-for(i = 0; i<64;i++)
-    if(i<32)
-    {
-     if( (aux >> i) & 1UL)
-      p[0] |= 1UL << (i+32);else
-      p[0] &= ~(1UL << (i+32));
-    }else
-    {
-     if( (aux >> i) & 1UL)
-      p[1] |= 1UL << (i-32);else
-      p[1] &= ~(1UL << (i-32));
-    }
 
 }
 void print_big(char *str, uint64_t *p, size_t n)
